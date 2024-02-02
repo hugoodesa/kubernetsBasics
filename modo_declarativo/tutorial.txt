@@ -1,0 +1,109 @@
+#1 precisa iniciar o minikube
+minikube start --driver=docker
+
+#2 ver o status do minikube
+minikube status 
+
+#3 ver o dashboard do minikube
+minikube dashboard --url
+
+#4 listar deployments    #5 deletar deployment
+kubectl get deployments  kubectl delete deployment <deployment-name>
+
+#6 create a deployment
+kubectl create deployment <nome-deployment> --image=<image-name>
+
+#7 verificar os pods
+kubectl get pods
+
+#8 descrever os pods
+kubectl get pods
+
+#9 create service (expor o deployment)
+kubectl expose deployment <deployment-name> --type=LoadBalancer --port=<port> 
+
+#10 gerar um ip de acesso para o service 
+minikube service <nome-service>
+
+#11 escalar o serviço (replicar)
+minikube scale deployment/<nome-service> --replicas=<numero>
+
+#12 diminuir o numero de replicas , caso necessário
+minikube scale deployment/<nome-service> --replicas=<numero>(menor que o atual)
+
+#13 Atualizar a imagem do deployment
+kubectl set image deployment/<deployment-name> <container-name>(main)=image:version
+
+#14 Criar arquivo deployment para subir o kubernets
+
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	  name: node-kube
+	spec:
+	  replicas: 4
+	  selector:
+	    matchLabels:
+	      app: node-kube
+	  template:
+	    metadata:
+	      labels:
+	        app:  node-kube
+	    spec:
+	      containers:
+	      - name: node
+	        image: hugoodesa/node-express:1.1
+
+comando : kubectl apply -f <.yaml>(nome arquivo)
+
+#15 Criar arquivo service para export o kubernets
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-kube
+spec:
+  selector:
+    app: node-kube
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000 
+  type: LoadBalancer
+
+comando : kubectl apply -f <.yaml>(nome arquivo)
+
+
+#16 unir os dois arquivos em um só e rodar juntos
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-kube
+spec:
+  selector:
+    app: node-kube
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000 
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-kube
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: node-kube
+  template:
+    metadata:
+      labels:
+        app:  node-kube
+    spec:
+      containers:
+      - name: node
+        image: hugoodesa/node-express:1.1
